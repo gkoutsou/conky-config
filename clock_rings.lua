@@ -4,22 +4,27 @@ Clock Rings by anotherkamila, modified by gkoutsou
 This script draws percentage meters as rings, and also draws clock hands! 
 It is fully customisable; all options are described in the script. 
 
-IMPORTANT: if you are using the 'cpu' function, it will cause a segmentation fault if it tries to draw a ring straight away. 
+IMPORTANT: if you are using the 'cpu' function, it will cause a segmentation 
+fault if it tries to draw a ring straight away. 
 
-To call this script in Conky, use the following (assuming that you save this script to ~/scripts/rings.lua):
+To call this script in Conky, use the following (assuming that you save this 
+script to ~/scripts/rings.lua):
 	lua_load ~/scripts/clock_rings-v1.1.1.lua
 	lua_draw_hook_pre clock_rings
-To be able to change the colours when having updates (assuming you are using pacman) use the following
+To be able to change the colours when having updates (assuming you are using 
+pacman) use the following (don't forget to change update.bash to include your
+pass word)
 	${execi 119 ~/.config/conky/bin/update.bash}
 	${execi 60 ~/.config/conky/bin/packages.bash}
 To display the image, use the following
 	${lua_parse draw_image}
 
 Changelog:
-+ v1.0 -- Original release (27.05.2013)
++ v1.1 -- (08.10.2013) pacman_status file is now located in /tmp, code cleanup
++ v1.0 -- (27.05.2013) Original release 
 ]]
 
---default_color = 0xd5ec8e
+--default_color = 0xD5EC8E
 default_color_normal = 0x64A2CC
 default_color_alert = 0xF2B9B9
 default_color = default_color_normal
@@ -60,7 +65,6 @@ gauges_big_start_r = 0.68 * gauges_r
 gauges_big_end_r = 1.4 * gauges_r
 gauges_small_start_r = 0.78 * gauges_r
 gauges_small_end_r = 1.1 * gauges_r
---clock_gauges_alpha = default_alpha
 
 settings_table = {
 	{
@@ -209,7 +213,6 @@ function draw_clock_hands(cr,xc,yc)
 	cairo_set_source_rgba(cr, rgb_to_r_g_b(clock_hour_hand_color, default_alpha))
 	cairo_arc(cr, hour_hand_x, hour_hand_y, clock_hour_r, 0, 2*math.pi)
 	cairo_stroke(cr)
-	--cairo_fill(cr)
 
 	-- Draw minute hand
 	mins_hand_x = xc + clock_mins_path_r*math.sin(mins_arc)
@@ -218,7 +221,6 @@ function draw_clock_hands(cr,xc,yc)
 	cairo_set_source_rgba(cr, rgb_to_r_g_b(clock_mins_hand_color, default_alpha))
 	cairo_arc(cr, mins_hand_x, mins_hand_y, clock_mins_r, 0, 2*math.pi)
 	cairo_stroke(cr)
-	--cairo_fill(cr)
 end
 
 function draw_clock_gauges(cr, xc, yc)
@@ -245,7 +247,7 @@ function draw_clock_gauges(cr, xc, yc)
 end
 
 function check_alert()
-	local alert=conky_parse("${if_existing /home/gkoutsou/test 1}1${else}0${endif}")
+	local alert=conky_parse("${if_existing /tmp/conky_pacman_state 1}1${else}0${endif}")
 	if alert == "1" then
 		gauges_color = default_color_alert
 		default_color = default_color_alert
@@ -278,7 +280,6 @@ function conky_clock_rings()
 	end
 
 	-- Check that Conky has been running for at least 5s
-
 	if conky_window==nil then return end
 	local cs=cairo_xlib_surface_create(conky_window.display,conky_window.drawable,conky_window.visual, conky_window.width,conky_window.height)
 
